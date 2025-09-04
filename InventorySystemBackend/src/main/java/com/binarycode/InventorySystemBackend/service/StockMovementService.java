@@ -28,10 +28,12 @@ public class StockMovementService {
 
     @Transactional
     public StockMovement createMovement(StockMovement movement) {
-        if (movement.getMovementType().getName() == MovementTypeEnum.ENTRADA) {
+        MovementTypeEnum movementType = movement.getMovementType().getName();
+        
+        if (movementType == MovementTypeEnum.ENTRADA) {
             productService.updateStock(movement.getProduct().getId(), movement.getQuantity()); 
-        } else if (movement.getMovementType().getName() == MovementTypeEnum.SALIDA || 
-                   movement.getMovementType().getName() == MovementTypeEnum.VENTA) {
+        } else if (movementType == MovementTypeEnum.SALIDA || 
+                   movementType == MovementTypeEnum.VENTA) {
             productService.updateStock(movement.getProduct().getId(), -movement.getQuantity()); 
         }
         
@@ -49,8 +51,6 @@ public class StockMovementService {
     public List<StockMovement> getMovementsByType(MovementTypeEnum movementType) {
         return stockMovementRepository.findByMovementType(movementType);
     }
-
-
 
     public List<StockMovement> getMovementsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return stockMovementRepository.findByDateRange(startDate, endDate);
