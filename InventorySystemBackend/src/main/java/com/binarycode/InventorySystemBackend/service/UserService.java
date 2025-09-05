@@ -21,14 +21,22 @@ public class UserService {
     public User verifyCredentials(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        System.out.println("Password en request: " + password);
+        System.out.println("Hash en DB: " + user.getPasswordHash());
+        System.out.println("¿Match?: " + passwordEncoder.matches(password, user.getPasswordHash()));
+        System.out.println("Usuario activo: " + user.isActive());
         
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
         
+        if (!user.isActive()) {
+            throw new RuntimeException("Usuario inactivo");
+        }
+        
         return user;
     }
-
  
     public String generateSessionToken(User user) {
      
