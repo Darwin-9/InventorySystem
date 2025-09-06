@@ -40,6 +40,9 @@ public class JwtService {
         @SuppressWarnings("unchecked")
         List<String> authorities = (List<String>) claims.get("authorities");
         
+        System.out.println("=== JWT SERVICE DEBUG ===");
+        System.out.println("Raw authorities from token: " + authorities);
+        
         if (authorities == null) {
             return Collections.emptyList();
         }

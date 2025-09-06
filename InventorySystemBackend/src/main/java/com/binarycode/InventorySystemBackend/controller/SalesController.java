@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 @RestController
 @RequestMapping("/sales")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('ADMIN', 'SALES')")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SALES')")
 public class SalesController {
 
     @GetMapping("/orders")

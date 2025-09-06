@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 @RestController
 @RequestMapping("/warehouse")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('ADMIN', 'WAREHOUSE_STAFF')")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_WAREHOUSE_STAFF')")
 public class WarehouseController {
 
     @GetMapping("/inventory")

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @GetMapping("/users")
