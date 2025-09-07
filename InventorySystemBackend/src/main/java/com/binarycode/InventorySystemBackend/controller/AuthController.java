@@ -1,5 +1,6 @@
 package com.binarycode.InventorySystemBackend.controller;
 
+import com.binarycode.InventorySystemBackend.dto.RegisterRequestDTO;
 import com.binarycode.InventorySystemBackend.model.User;
 import com.binarycode.InventorySystemBackend.model.UserRole;
 import com.binarycode.InventorySystemBackend.service.JwtService; 
@@ -26,7 +27,7 @@ public class AuthController {
     private final CustomUserDetailsService userDetailsService;
 
 
-@PostMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             User user = userService.verifyCredentials(request.getUsername(), request.getPassword());
@@ -61,7 +62,7 @@ public class AuthController {
     }
 
    @PostMapping("/verify-2fa")
-public ResponseEntity<?> verify2FA(@RequestBody Verify2FARequest request) {
+    public ResponseEntity<?> verify2FA(@RequestBody Verify2FARequest request) {
     try {
         User user = userService.getUserById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -89,32 +90,33 @@ public ResponseEntity<?> verify2FA(@RequestBody Verify2FARequest request) {
 }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            if (userService.usernameExists(request.getUsername())) {
-                return ResponseEntity.badRequest().body("El nombre de usuario ya existe");
-            }
-            
-            if (userService.emailExists(request.getEmail())) {
-                return ResponseEntity.badRequest().body("El email ya está registrado");
-            }
-
-            User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail()) 
-                .passwordHash(request.getPassword()) 
-                .fullName(request.getFullName())
-                .role(request.getRole() != null ? request.getRole() : UserRole.SALES)
-                .twoFactorEnabled(true) 
-                .build();
-
-            User savedUser = userService.createUser(user);
-            
-            return ResponseEntity.ok(savedUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<?> register(@RequestBody RegisterRequestDTO request) {
+    try {
+        if (userService.usernameExists(request.getUsername())) {
+            return ResponseEntity.badRequest().body("El nombre de usuario ya existe");
         }
+
+        if (userService.emailExists(request.getEmail())) {
+            return ResponseEntity.badRequest().body("El email ya está registrado");
+        }
+
+        User user = User.builder()
+            .username(request.getUsername())
+            .email(request.getEmail())
+            .passwordHash(request.getPassword())
+            .fullName(request.getFullName())
+            .role(request.getRole() != null ? request.getRole() : UserRole.SALES)
+            .twoFactorEnabled(true)
+            .build();
+
+        User savedUser = userService.createUser(user);
+
+        return ResponseEntity.ok(savedUser);
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
+}
+
 
     @PostMapping("/resend-2fa")
     public ResponseEntity<?> resend2FACode(@RequestParam String email) {
