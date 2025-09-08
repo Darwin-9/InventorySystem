@@ -19,7 +19,7 @@ public class MovementType {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "type_name")
-    private MovementTypeEnum name;
+    private MovementTypeEnum name; 
     
     @Column(length = 255)
     private String description;
@@ -29,4 +29,3 @@ public class MovementType {
     @ToString.Exclude
     private List<StockMovement> movements = new ArrayList<>();
 }
-
