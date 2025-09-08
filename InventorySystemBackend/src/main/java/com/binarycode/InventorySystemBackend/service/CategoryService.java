@@ -15,6 +15,9 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    public Optional<Category> getCategoryByName(String name) {
+        return categoryRepository.findByName(name);
+    }
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
@@ -25,10 +28,6 @@ public class CategoryService {
 
     public Optional<Category> getCategoryById(Long id) {
         return categoryRepository.findById(id);
-    }
-
-    public Optional<Category> getCategoryByName(String name) {
-        return categoryRepository.findByName(name);
     }
 
     public Category createCategory(Category category) {

@@ -1,5 +1,6 @@
 package com.binarycode.InventorySystemBackend.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -28,10 +29,10 @@ public class Category {
     private Boolean active = true;
     
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @Builder.Default
     @ToString.Exclude
     private List<Product> products = new ArrayList<>();
-    
     
     public Boolean isActive() {
         return active;
