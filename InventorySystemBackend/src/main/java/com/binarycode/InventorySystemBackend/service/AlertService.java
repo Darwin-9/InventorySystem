@@ -19,6 +19,10 @@ public class AlertService {
     private final AlertRepository alertRepository;
     private final ProductService productService;
 
+    public List<Alert> getAlertsByType(AlertType alertType) {
+        return alertRepository.findByAlertType(alertType.name());
+    }
+
     public List<Alert> getAllAlerts() {
         return alertRepository.findAll();
     }
@@ -50,10 +54,6 @@ public class AlertService {
         return alertRepository.findByProductId(productId);
     }
 
-    public List<Alert> getAlertsByType(AlertType alertType) {
-        return alertRepository.findByAlertType(alertType.name());
-    }
-
     public long countActiveAlerts() {
         return alertRepository.countActiveAlerts();
     }
@@ -62,11 +62,9 @@ public class AlertService {
         return alertRepository.countResolvedAlerts();
     }
 
-  
     public long countAlertsByStatus(Boolean resolved) {
         return alertRepository.countByResolved(resolved);
     }
-
 
     @Scheduled(cron = "0 0 8 * * ?")
     @Transactional

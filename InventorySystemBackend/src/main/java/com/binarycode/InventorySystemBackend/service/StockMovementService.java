@@ -28,15 +28,25 @@ public class StockMovementService {
 
     @Transactional
     public StockMovement createMovement(StockMovement movement) {
-        MovementTypeEnum movementType = movement.getMovementType().getName();
-        
-        if (movementType == MovementTypeEnum.ENTRADA) {
-            productService.updateStock(movement.getProduct().getId(), movement.getQuantity()); 
-        } else if (movementType == MovementTypeEnum.SALIDA || 
-                   movementType == MovementTypeEnum.VENTA) {
-            productService.updateStock(movement.getProduct().getId(), -movement.getQuantity()); 
+        // Establecer fecha actual si no viene
+        if (movement.getMovementDate() == null) {
+            movement.setMovementDate(LocalDateTime.now());
         }
         
+        // Actualizar stock según el tipo de movimiento
+        if (movement.getMovementType() != null && movement.getMovementType().getName() != null) {
+            if (movement.getMovementType().getName() == MovementTypeEnum.ENTRADA) {
+                productService.updateStock(movement.getProduct().getId(), movement.getQuantity());
+            } else if (movement.getMovementType().getName() == MovementTypeEnum.SALIDA || 
+                       movement.getMovementType().getName() == MovementTypeEnum.VENTA ||
+                       movement.getMovementType().getName() == MovementTypeEnum.DANIO ||
+                       movement.getMovementType().getName() == MovementTypeEnum.PERDIDA ||
+                       movement.getMovementType().getName() == MovementTypeEnum.VENCIMIENTO) {
+                productService.updateStock(movement.getProduct().getId(), -movement.getQuantity());
+            }
+        }
+        
+        // Guardar y devolver el movimiento de stock
         return stockMovementRepository.save(movement);
     }
 
@@ -49,7 +59,7 @@ public class StockMovementService {
     }
 
     public List<StockMovement> getMovementsByType(MovementTypeEnum movementType) {
-        return stockMovementRepository.findByMovementType(movementType);
+        return stockMovementRepository.findByMovementType(movementType.name());
     }
 
     public List<StockMovement> getMovementsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
