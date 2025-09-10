@@ -25,10 +25,9 @@ public class MovementTypeService {
     }
 
     public Optional<MovementType> getMovementTypeByName(MovementTypeEnum name) {
-        // Cambiado: findByTypeName → findByName
         return movementTypeRepository.findByName(name);
     }
-    
+
     public MovementType createMovementType(MovementType movementType) {
         return movementTypeRepository.save(movementType);
     }
@@ -50,5 +49,4 @@ public class MovementTypeService {
     public boolean movementTypeExists(MovementTypeEnum name) {
         return movementTypeRepository.existsByName(name);
     }
-    
 }
