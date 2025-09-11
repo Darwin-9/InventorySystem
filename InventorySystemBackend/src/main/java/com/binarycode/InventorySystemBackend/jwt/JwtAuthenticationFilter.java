@@ -13,10 +13,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import java.util.Arrays;
 
-import java.io.IOException;@Component
+import java.io.IOException;
+@Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -24,9 +23,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) 
-            throws ServletException, IOException {
-        
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) 
+        throws ServletException, IOException {
+
+                String path = request.getRequestURI();
+    System.out.println("Request URI: " + path);
+
+    if (
+        path.startsWith("/auth") ||
+        path.startsWith("/test") 
+    ) {
+        filterChain.doFilter(request, response);
+        return;
+    }
+
         final String authHeader = request.getHeader("Authorization");
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -40,25 +50,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                
-                System.out.println("=== JWT FILTER DEBUG ===");
-                System.out.println("Username: " + username);
-                System.out.println("UserDetails Authorities: " + userDetails.getAuthorities());
-                System.out.println("Token valid: " + jwtService.isTokenValid(jwt, userDetails));
-                
+                System.out.println("=== JWT FILTER REQUEST DEBUG ===");
+                System.out.println("Request URI: " + request.getRequestURI());
+                System.out.println("Request Method: " + request.getMethod());
+                System.out.println("Authorization Header: " + request.getHeader("Authorization"));
+                System.out.println("=== END REQUEST DEBUG ===");
+
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-    
-                    var authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                    
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities);
-                    
+                    var authorities = userDetails.getAuthorities();
+
+                    UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    
-                    System.out.println("Authentication set with: " + 
+
+                    System.out.println("Authentication set with: " +
                         SecurityContextHolder.getContext().getAuthentication().getAuthorities());
                 }
+
                 System.out.println("=== END DEBUG ===");
             }
         } catch (Exception e) {
