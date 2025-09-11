@@ -32,7 +32,8 @@ public class StockMovementController {
 
     @PostMapping
     public ResponseEntity<StockMovement> createMovement(@RequestBody StockMovement movement) {
-        return ResponseEntity.ok(movementService.createMovement(movement));
+        StockMovement createdMovement = movementService.createMovement(movement);
+        return ResponseEntity.ok(createdMovement);
     }
 
     @GetMapping("/product/{productId}")
@@ -45,12 +46,10 @@ public class StockMovementController {
         return ResponseEntity.ok(movementService.getMovementsByUser(userId));
     }
 
-
     @GetMapping("/type/{movementType}")
     public ResponseEntity<List<StockMovement>> getMovementsByType(@PathVariable MovementTypeEnum movementType) {
         return ResponseEntity.ok(movementService.getMovementsByType(movementType));
     }
-
 
     @GetMapping("/date-range")
     public ResponseEntity<List<StockMovement>> getMovementsByDateRange(
