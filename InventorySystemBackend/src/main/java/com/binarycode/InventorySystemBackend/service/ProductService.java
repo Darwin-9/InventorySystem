@@ -3,10 +3,13 @@ package com.binarycode.InventorySystemBackend.service;
 import com.binarycode.InventorySystemBackend.model.Product;
 import com.binarycode.InventorySystemBackend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,5 +90,36 @@ public class ProductService {
             product.setCurrentStock(product.getCurrentStock() + quantity);
             productRepository.save(product);
         });
+    }
+
+    public List<Product> getFilteredProducts(String startDate, String endDate, Long categoryId, 
+                                           Long supplierId, Boolean lowStockOnly) {
+        
+        Specification<Product> spec = Specification.where((root, query, cb) -> 
+            cb.isTrue(root.get("active")));
+        
+        if (startDate != null && endDate != null) {
+            LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+            LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+            spec = spec.and((root, query, cb) -> 
+                cb.between(root.get("createdAt"), start, end));
+        }
+        
+        if (categoryId != null) {
+            spec = spec.and((root, query, cb) -> 
+                cb.equal(root.get("category").get("id"), categoryId));
+        }
+        
+        if (supplierId != null) {
+            spec = spec.and((root, query, cb) -> 
+                cb.equal(root.get("supplier").get("id"), supplierId));
+        }
+        
+        if (lowStockOnly != null && lowStockOnly) {
+            spec = spec.and((root, query, cb) -> 
+                cb.lessThanOrEqualTo(root.get("currentStock"), root.get("minStock")));
+        }
+        
+        return productRepository.findAll(spec);
     }
 }

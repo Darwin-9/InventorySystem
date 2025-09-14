@@ -15,7 +15,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.addAllowedOriginPattern("*"); 
-
+        
     
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
