@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/cart")
@@ -19,13 +19,12 @@ public class ShoppingCartController {
     private final ShoppingCartService cartService;
     private final ProductService productService;
 
-    // Agregar producto con JSON
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@RequestBody CartDTO.AddToCartRequest request) {
         try {
             Product product = productService.getProductById(request.getProductId())
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-            
+
             cartService.addItem(product, request.getQuantity());
             return ResponseEntity.ok("Producto agregado al carrito: " + product.getName());
         } catch (Exception e) {
@@ -33,7 +32,6 @@ public class ShoppingCartController {
         }
     }
 
-    // Actualizar cantidad con JSON
     @PutMapping("/update")
     public ResponseEntity<String> updateQuantity(@RequestBody CartDTO.UpdateCartRequest request) {
         try {
@@ -44,7 +42,6 @@ public class ShoppingCartController {
         }
     }
 
-    // Remover producto con JSON
     @DeleteMapping("/remove")
     public ResponseEntity<String> removeFromCart(@RequestBody CartDTO.CartOperationRequest request) {
         try {
@@ -55,38 +52,47 @@ public class ShoppingCartController {
         }
     }
 
-    // Ver carrito completo
     @GetMapping
-    public ResponseEntity<Map<Long, ShoppingCartService.CartItem>> getCart() {
-        return ResponseEntity.ok(cartService.getItems());
+    public ResponseEntity<CartDTO.CartResponse> getCart() {
+        CartDTO.CartResponse response = new CartDTO.CartResponse();
+
+        List<CartDTO.CartItemResponse> items = cartService.getItems().values().stream().map(item -> {
+            CartDTO.CartItemResponse dto = new CartDTO.CartItemResponse();
+            dto.setProductId(item.getProduct().getId());
+            dto.setProductName(item.getProduct().getName());
+            dto.setQuantity(item.getQuantity());
+            dto.setSalePrice(item.getProduct().getSalePrice());
+            dto.setSubtotal(item.getSubtotal());
+            return dto;
+        }).toList();
+
+        response.setItems(items);
+        response.setTotal(cartService.getTotal());
+
+        return ResponseEntity.ok(response);
     }
 
-    // Obtener total
     @GetMapping("/total")
     public ResponseEntity<BigDecimal> getCartTotal() {
         return ResponseEntity.ok(cartService.getTotal());
     }
 
-    // Contar items
     @GetMapping("/count")
     public ResponseEntity<Integer> getItemCount() {
         return ResponseEntity.ok(cartService.getTotalItems());
     }
 
-    // Vaciar carrito
     @DeleteMapping("/clear")
     public ResponseEntity<String> clearCart() {
         cartService.clear();
         return ResponseEntity.ok("Carrito vaciado");
     }
 
-    // Verificar si está vacío
     @GetMapping("/empty")
     public ResponseEntity<Boolean> isCartEmpty() {
         return ResponseEntity.ok(cartService.isEmpty());
     }
 
-    // Procesar compra
     @PostMapping("/checkout")
     public ResponseEntity<String> checkout() {
         try {
@@ -97,7 +103,6 @@ public class ShoppingCartController {
         }
     }
 
-    // Obtener item específico
     @GetMapping("/item/{productId}")
     public ResponseEntity<?> getCartItem(@PathVariable Long productId) {
         try {
@@ -105,9 +110,18 @@ public class ShoppingCartController {
             if (item == null) {
                 return ResponseEntity.notFound().build();
             }
-            return ResponseEntity.ok(item);
+
+            CartDTO.CartItemResponse dto = new CartDTO.CartItemResponse();
+            dto.setProductId(item.getProduct().getId());
+            dto.setProductName(item.getProduct().getName());
+            dto.setQuantity(item.getQuantity());
+            dto.setSalePrice(item.getProduct().getSalePrice());
+            dto.setSubtotal(item.getSubtotal());
+
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
 }

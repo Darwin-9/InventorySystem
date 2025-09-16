@@ -49,8 +49,11 @@ public class ShoppingCartService {
         if (quantity <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
         }
+
+        if (product.getSalePrice() == null || product.getSalePrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("El producto " + product.getName() + " no tiene un precio de venta válido");
+        }
         
-        // Validar stock disponible
         if (product.getCurrentStock() < quantity) {
             throw new RuntimeException("Stock insuficiente. Solo hay " + product.getCurrentStock() + " unidades disponibles");
         }
@@ -59,7 +62,6 @@ public class ShoppingCartService {
             CartItem existingItem = items.get(product.getId());
             int newQuantity = existingItem.getQuantity() + quantity;
             
-            // Validar stock again para la nueva cantidad total
             if (product.getCurrentStock() < newQuantity) {
                 throw new RuntimeException("Stock insuficiente. No puedes agregar " + quantity + 
                         " unidades. Ya tienes " + existingItem.getQuantity() + 
@@ -90,7 +92,6 @@ public class ShoppingCartService {
         }
         
         CartItem item = items.get(productId);
-        // Validar stock para la nueva cantidad
         if (item.getProduct().getCurrentStock() < quantity) {
             throw new RuntimeException("Stock insuficiente. Solo hay " + 
                     item.getProduct().getCurrentStock() + " unidades disponibles");
@@ -123,7 +124,6 @@ public class ShoppingCartService {
         return items.get(productId);
     }
     
-    // Método para procesar la compra y actualizar inventario
     public String processPurchase(ProductService productService) {
         if (items.isEmpty()) {
             throw new RuntimeException("El carrito está vacío");
@@ -134,7 +134,10 @@ public class ShoppingCartService {
         
         for (CartItem item : items.values()) {
             try {
-                // Actualizar stock en la base de datos
+                if (item.getProduct().getSalePrice() == null || item.getProduct().getSalePrice().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new RuntimeException("El producto " + item.getProduct().getName() + " no tiene un precio válido y no se puede procesar la compra");
+                }
+
                 productService.updateStock(item.getProduct().getId(), -item.getQuantity());
                 
                 result.append(String.format("- %s: %d unidades x $%s = $%s\n",
@@ -150,7 +153,6 @@ public class ShoppingCartService {
         
         result.append(String.format("Total: $%s", getTotal()));
         
-        // Limpiar carrito después de la compra
         clear();
         
         return result.toString();
