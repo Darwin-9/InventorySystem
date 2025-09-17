@@ -5,10 +5,13 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "movement_types")
 @Data
 @NoArgsConstructor
+
 @AllArgsConstructor
 @Builder
 public class MovementType {
@@ -27,5 +30,6 @@ public class MovementType {
     @OneToMany(mappedBy = "movementType", cascade = CascadeType.ALL)
     @Builder.Default
     @ToString.Exclude
+    @JsonIgnore 
     private List<StockMovement> movements = new ArrayList<>();
 }

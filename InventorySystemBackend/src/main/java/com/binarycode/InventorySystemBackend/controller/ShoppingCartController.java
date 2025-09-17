@@ -3,6 +3,7 @@ package com.binarycode.InventorySystemBackend.controller;
 import com.binarycode.InventorySystemBackend.dto.CartDTO;
 import com.binarycode.InventorySystemBackend.model.Product;
 import com.binarycode.InventorySystemBackend.service.ProductService;
+import com.binarycode.InventorySystemBackend.service.PurchaseService;
 import com.binarycode.InventorySystemBackend.service.ShoppingCartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class ShoppingCartController {
 
     private final ShoppingCartService cartService;
     private final ProductService productService;
+    private final PurchaseService purchaseService; 
 
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@RequestBody CartDTO.AddToCartRequest request) {
@@ -94,10 +96,10 @@ public class ShoppingCartController {
     }
 
     @PostMapping("/checkout")
-    public ResponseEntity<String> checkout() {
+    public ResponseEntity<?> checkout() {
         try {
-            String result = cartService.processPurchase(productService);
-            return ResponseEntity.ok(result);
+            var purchase = purchaseService.processPurchase();
+            return ResponseEntity.ok(purchase); 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -123,5 +125,4 @@ public class ShoppingCartController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
 }
